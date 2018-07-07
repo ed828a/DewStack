@@ -9,27 +9,27 @@ import android.support.design.widget.Snackbar
 class DewStack<T>(val size: Int) {
     private var deep = 0
     private var counter = -1
-    private var position = 0
+    private var cursor = 0
     private var previousPosition = 0
     private val box = Array<Any>(size) { 0 }
 
     fun push(item: T) {
-        box[position] = item as Any
-        previousPosition = position
+        previousPosition = cursor
         ++counter
-        position = (counter % size)
-        if (deep < size - 1) deep++
+        cursor = (counter % size)
+        box[cursor] = item as Any
+        if (deep < size - 1) ++deep
     }
 
     fun pop(): T? {
-        if (deep < 1) {
-            return null
+        return if (deep < 1) {
+            null
         } else {
-            deep--
-            previousPosition = position
+            --deep
+            previousPosition = cursor
             --counter
-            position = (counter % size)
-            return box[position] as T
+            cursor = (counter % size)
+            box[cursor] as T
         }
     }
 }
