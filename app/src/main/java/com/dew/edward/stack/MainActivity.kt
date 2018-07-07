@@ -11,12 +11,9 @@ import kotlinx.android.synthetic.main.content_main.*
 class MainActivity : AppCompatActivity() {
 
     val boxSize = 5
-    val box = IntArray(5)
-    var deep = 0
-    var counter = -1
+    val box = DewStack<String> (boxSize)
     var number = -1
-    var position = 0
-    var previousPosition = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,51 +23,48 @@ class MainActivity : AppCompatActivity() {
         showNumbers()
 
         fabAdd.setOnClickListener { view ->
-            previousPosition = position
-            ++counter
-            position = (counter % boxSize)
-            number++
-            box[position] = number
-            showText(position)
-            colorBox(position)
-            if (deep < boxSize - 1) {
-                deep++
+            number ++
+            with(box) {
+                push(number.toString())
+                showText(cursor, number.toString())
+                colorBox(cursor)
             }
             showNumbers()
         }
 
 
         fabRemove.setOnClickListener { view ->
-
-            if (deep < 1) {
-                Snackbar.make(view, "reaching the bottom of the stack", Snackbar.LENGTH_SHORT).show()
-            } else {
-                deep--
-                previousPosition = position
-                --counter
-                position = (counter % boxSize)
-                colorBox(position)
+            when (box.pop()) {
+                null ->
+                    Snackbar.make(view,
+                            "reaching the bottom of the stack", Snackbar.LENGTH_SHORT).show()
+                else -> {
+                    colorBox(box.cursor)
+                    showNumbers()
+                }
             }
-            showNumbers()
         }
     }
 
     private fun showNumbers() {
-        counterText.text = counter.toString()
-        positionText.text = position.toString()
-        numberText.text = number.toString()
-        deepText.text = deep.toString()
-
+        with(box){
+            counterText.text = counter.toString()
+            positionText.text = cursor.toString()
+            numberText.text = number.toString()
+            deepText.text = deep.toString()
+            previousText.text = previousPosition.toString()
+        }
     }
 
-    private fun showText(position: Int) {
+    private fun showText(position: Int, item: String) {
         val textView = highlightTextView(position)
-        textView?.text = box[position].toString()
+        textView?.text = item
     }
 
     private fun colorBox(position: Int) {
-        val textView = highlightTextView(previousPosition)
+        val textView = highlightTextView(box.previousPosition)
         textView?.setBackgroundColor(resources.getColor(R.color.textBackground))
+        if (box.previousPosition == 0 && box.cursor == 0 && box.deep == 0) return
         val highlight = highlightTextView(position)
         highlight?.setBackgroundColor(resources.getColor(R.color.colorAccent))
     }
